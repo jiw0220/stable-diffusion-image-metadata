@@ -2,7 +2,7 @@
 
 #### This tool provides the capability to extract and parse metadata from images. It is inspired by the work of the [civitai][civitai] project and leverages some of their code for image metadata parses
 
-## Usage
+## Installation
 
 `npm install --save stable-diffusion-image-metadata`
 
@@ -14,7 +14,7 @@
 }
 ```
 
-## Example
+## Usage
 
 ```typescript
 export { extract, parse, stringify } from 'stable-diffusion-image-metadata';
