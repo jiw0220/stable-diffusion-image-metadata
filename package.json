@@ -1,6 +1,6 @@
 {
   "name": "stable-diffusion-image-metadata",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "stable diffusion image metadata",
   "main": "dist/index.js",
   "keywords": [
