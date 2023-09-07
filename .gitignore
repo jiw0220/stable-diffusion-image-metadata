@@ -1,0 +1,25 @@
+# Various IDEs and Editors
+.vscode/
+.idea/
+**/*~
+
+# Mac OSX temporary files
+.DS_Store
+**/.DS_Store
+
+
+# dir
+node_modules/
+dist/
+coverage/
+
+# environment variables
+.env
+
+# package-lock.json
+package-lock.json
+
+#tsconfig.prod.tsbuildinfo
+tsconfig.prod.tsbuildinfo
+
+

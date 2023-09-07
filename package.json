@@ -1,0 +1,36 @@
+{
+  "name": "stable-diffusion-image-metadata",
+  "version": "1.0.4",
+  "description": "stable diffusion image metadata",
+  "main": "dist/index.js",
+  "keywords": [
+    "stable diffusion",
+    "parse",
+    "read",
+    "extract",
+    "metadata"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.prod.json",
+    "test:browser": "karma start karma.conf.js"
+  },
+  "author": "jiw",
+  "license": "MPL-2.0",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/gomfunkel/node-exif.git"
+  },
+  "dependencies": {
+    "exifreader": "^4.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.9",
+    "@types/tape": "^5.6.0",
+    "karma": "^6.4.1",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-tap": "^4.2.0",
+    "karma-typescript": "^5.5.3",
+    "karma-typescript-es6-transform": "^5.5.3",
+    "tape": "^5.6.3"
+  }
+}
