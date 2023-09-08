@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "build": "tsc --build tsconfig.prod.json",
-    "test:browser": "karma start karma.conf.js"
+    "test:browser": "karma start karma.conf.js",
+    "test:node": "ts-node ./test/test.ts"
   },
   "author": "jiw",
   "license": "MPL-2.0",
