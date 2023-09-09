@@ -1,6 +1,6 @@
 {
   "name": "stable-diffusion-image-metadata",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "stable diffusion image metadata",
   "main": "dist/index.js",
   "keywords": [
@@ -12,8 +12,9 @@
   ],
   "scripts": {
     "build": "tsc --build tsconfig.prod.json",
+    "tape": "tape -r ts-node/register",
     "test:browser": "karma start karma.conf.js",
-    "test:node": "ts-node ./test/test.ts"
+    "test:node": "npm run tape -- test/*.spec.ts"
   },
   "author": "jiw",
   "license": "MPL-2.0",
@@ -32,6 +33,7 @@
     "karma-tap": "^4.2.0",
     "karma-typescript": "^5.5.3",
     "karma-typescript-es6-transform": "^5.5.3",
-    "tape": "^5.6.3"
+    "tape": "^5.6.3",
+    "ts-node": "^10.9.1"
   }
 }

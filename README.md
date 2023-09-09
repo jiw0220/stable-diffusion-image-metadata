@@ -19,7 +19,7 @@
 ```typescript
 export { extract, parse, stringify } from 'stable-diffusion-image-metadata';
 
-const image = 'https://image.png';
+const image = 'https://image.png'; // or File | base64
 
 const [parameters, isParameters] = await extract(image);
 
@@ -27,5 +27,12 @@ const metadata = parse(parameters);
 
 const metadataStr = stringify(metadata);
 ```
+
+## Changelog
+
+_[1.0.9] - 2023-09-09_
+
+- remove 'buffer-big-endian.ts'
+- fixed function 'extract' chinese problem
 
 [civitai]: https://github.com/civitai/civitai/blob/b367192a05a3ac0d9a064f978ba3077d8e0aab1b/src/utils/metadata/automatic.metadata.ts

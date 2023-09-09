@@ -1,7 +1,28 @@
 import ExifReader from 'exifreader';
-import { BufferBigEndian } from './buffer-big-endian';
 type base64 = string;
 type URL = string | base64;
+
+function getStringWithUTF8(numbers: Uint8Array | number[]): string {
+  let str = '';
+  let i = 0;
+  while (numbers[i] !== void 0) {
+    const unicode = numbers[i++] || 0;
+    str += String.fromCharCode(unicode);
+  }
+  return str;
+}
+
+function getStringWithUTF16(numbers: Uint8Array | number[]): string {
+  let str = '';
+  let i = 0;
+  while (numbers[i] !== void 0) {
+    const uint8_1 = numbers[i++] || 0;
+    const uint8_2 = numbers[i++] || 0;
+    const unicode = (uint8_1 << 8) | uint8_2;
+    str += String.fromCharCode(unicode);
+  }
+  return str;
+}
 
 /**
  * Extract stable-diffusion image parameters
@@ -13,19 +34,15 @@ export async function extract(file: File | URL): Promise<[string, boolean]> {
   let parameters = '';
   if (tags.UserComment) {
     try {
-      // const decoder = new TextDecoder('uft-8');
-      // parameters = decoder.decode(Buffer.from(new Uint8Array()));
       const raw = tags.UserComment?.value as number[];
-      const value = raw.slice(8);
-      const bbe = new BufferBigEndian();
-      bbe.pushUint8List(value);
-      parameters = bbe.getStringWithUtf16(value.length);
-      // if (typeof window === 'object' && typeof document === 'object') {
-      //   const div = document.createElement('div');
-      //   div.innerHTML = parameters;
-      //   parameters = div.innerHTML;
-      //   div.remove();
-      // }
+      const uint8Array = raw.slice(0, 8);
+      const uint16Array = raw.slice(8);
+      const encoding = getStringWithUTF8(uint8Array);
+      const content = getStringWithUTF16(uint16Array);
+      if (encoding !== 'UNICODE\x00') {
+        console.warn(`encoding [${encoding}] is not support`);
+      }
+      parameters = content;
     } catch (e) {
       console.error(`parse 'UserComment' error`, tags.UserComment);
       console.error(e);
@@ -34,10 +51,6 @@ export async function extract(file: File | URL): Promise<[string, boolean]> {
     parameters = tags.parameters?.value;
   } else {
     console.warn(`not found 'parameters' and 'UserComment'`, tags);
-  }
-
-  if (parameters) {
-    parameters = unescape(parameters.replace('UNICODE', '').replace(/�/g, ''));
   }
 
   return [parameters, parameters.includes('Steps: ')];
