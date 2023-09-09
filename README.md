@@ -30,7 +30,7 @@ const metadataStr = stringify(metadata);
 
 ## Changelog
 
-_[1.0.9] - 2023-09-09_
+_[1.0.10] - 2023-09-09_
 
 - remove 'buffer-big-endian.ts'
 - fixed function 'extract' chinese problem
