@@ -5,7 +5,7 @@
 #### About for the processing of parameters, there are two steps.
 
 - (1) Preprocessing, which extracts special attributes in a 'RegExp'
-- (2) Extracting the primary attributes whit 'split(': ') and split(', ')'
+- (2) Extracting the primary attributes with 'split(': ') and split(', ')'
 
 ## Installation
 

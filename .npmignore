@@ -1,1 +1,11 @@
 test/
+
+*.backup.*
+
+karma.conf.js
+
+tsconfig.json
+
+tsconfig.prod.json
+
+tsconfig.prod.tsbuildinfo
