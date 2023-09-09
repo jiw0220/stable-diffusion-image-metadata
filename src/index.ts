@@ -77,6 +77,9 @@ type Resource = {
   hash?: string;
 };
 
+type PreProcessValueFn = (v: string) => string;
+type PreProcessValue = string;
+
 const imageMetadataKeys: Array<[string, string]> = [
   ['Seed', 'seed'],
   ['CFG scale', 'cfgScale'],
@@ -89,20 +92,33 @@ const imageMetaKeyMap = new Map<string, string>(imageMetadataKeys);
 const imageMetaKeyReverseMap = new Map<string, string>(
   imageMetadataKeys.map((i) => i.reverse()) as Array<[string, string]>
 );
-const getImageMetaKey = (key: string, keyMap: Map<string, string>) => keyMap.get(key.trim()) ?? key.trim();
 const automaticExtraNetsRegex = /<(lora|hypernet):([a-zA-Z0-9_\.]+):([0-9.]+)>/g;
 const automaticNameHash = /([a-zA-Z0-9_\.]+)\(([a-zA-Z0-9]+)\)/;
-const badExtensionKeys = ['Resources: ', 'Hashed prompt: ', 'Hashed Negative prompt: '];
+const getImageMetaKey = (key: string, keyMap: Map<string, string>) => keyMap.get(key.trim()) ?? key.trim();
 const stripKeys = ['Template: ', 'Negative Template: '] as const;
-const hashesRegex = /, Hashes:\s*({[^}]+})/;
 
-/**
- * Parse stable-diffusion image parameters
- * Reference "civitai" [https://github.com/civitai/civitai/blob/b367192a05a3ac0d9a064f978ba3077d8e0aab1b/src/utils/metadata/automatic.metadata.ts]
- * @param parameters
- * @returns {ImageMeta}
- *
- */
+function preproccessFormatJSONValueFn(v: string) {
+  try {
+    return JSON.parse(v);
+  } catch (e) {
+    return v;
+  }
+}
+function preproccessFormatHandler(configValue: PreProcessValue | PreProcessValueFn, inputValue: string) {
+  console.info(configValue);
+  if (typeof configValue === 'function') {
+    return configValue.call(null, inputValue);
+  }
+  return configValue;
+}
+
+const preproccessConfigs = [
+  { reg: /(ControlNet \d+): "([^"]+)"/g },
+  { reg: /(Lora hashes): "([^"]+)"/g },
+  { reg: /(Hashes): ({[^}]+})/g, key: 'hashes', value: preproccessFormatJSONValueFn },
+  //...There should be many configs that need to be preprocessed in the future
+];
+
 export function parse(parameters: string): ImageMeta {
   const metadata: ImageMeta = {};
   if (!parameters) return metadata;
@@ -116,31 +132,27 @@ export function parse(parameters: string): ImageMeta {
   // Strip it from the meta lines
   if (detailsLineIndex > -1) metaLines.splice(detailsLineIndex, 1);
   // Remove meta keys I wish I hadn't made... :(
-  for (const key of badExtensionKeys) {
-    if (!detailsLine.includes(key)) continue;
-    detailsLine = detailsLine.split(key)[0];
-  }
 
-  // Extract Hashes
-  const hashes = detailsLine?.match(hashesRegex)?.[1];
-  if (hashes && detailsLine) {
-    metadata.hashes = JSON.parse(hashes);
-    detailsLine = detailsLine.replace(hashesRegex, '');
-  }
-
-  let currentKey = '';
-  const parts = detailsLine.split(': ') ?? [];
-  for (const part of parts) {
-    const priorValueEnd = part.lastIndexOf(',');
-    if (parts[parts.length - 1] === part) {
-      metadata[currentKey] = part.trim();
-    } else if (priorValueEnd !== -1) {
-      metadata[currentKey] = part.slice(0, priorValueEnd).trim();
-      currentKey = getImageMetaKey(part.slice(priorValueEnd + 1), imageMetaKeyMap);
-    } else {
-      currentKey = getImageMetaKey(part, imageMetaKeyMap);
+  preproccessConfigs.forEach(({ reg, key: configKey, value: configValue }) => {
+    let matchData: any = {};
+    let matchValues = [];
+    let match;
+    while ((match = reg.exec(detailsLine)) !== null) {
+      const key = configKey !== void 0 ? preproccessFormatHandler(configKey, match[1]) : match[1];
+      const value = configValue !== void 0 ? preproccessFormatHandler(configValue, match[2]) : match[2];
+      matchData[key] = value;
+      matchValues.push(match[0]);
     }
-  }
+    matchValues.forEach((value) => (detailsLine = detailsLine.replace(value, '')));
+    Object.assign(metadata, matchData);
+  });
+
+  detailsLine.split(', ').forEach((str: string) => {
+    const [_k, _v] = str.split(': ');
+    if (!_k) return;
+    const key = getImageMetaKey(_k, imageMetaKeyMap);
+    metadata[key] = _v;
+  });
 
   // Extract prompts
   const [prompt, ...negativePrompt] = metaLines
